@@ -1,0 +1,18 @@
+name: 'Runs command and stores outputs'
+description: ''
+inputs:
+  script:
+    description: 'command'
+    required: true
+outputs:
+  stdout:
+    description: ''
+  stderr:
+    description: ''
+  exit:
+    description: ''
+  success:
+    description: ''
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
