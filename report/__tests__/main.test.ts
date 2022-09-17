@@ -3,6 +3,7 @@ import * as Render from "../src/render"
 import { PathLike, promises as fs } from 'fs'
 import { FileHandle } from "fs/promises"
 import * as glob from '@actions/glob'
+import path from "path"
 import type { Globber } from '@actions/glob'
 
 type FsContnets = {
@@ -35,7 +36,8 @@ class MockGlobber implements Globber {
 
 describe("Run tests", () => {
   beforeEach(() => {
-    jest.resetAllMocks()
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
   })
 
   const fsContents: FsContnets = {
@@ -54,12 +56,14 @@ describe("Run tests", () => {
   test("renders template with data", async () => {
     const readFileSpy = jest.spyOn(fs, "readFile")
     const globCreateSpy = jest.spyOn(glob, "create")
+    const resolveSpy = jest.spyOn(path, "resolve")
     readFileSpy.mockImplementation(async (path: FileHandle | PathLike): Promise<string> => {
-      return fsContents[path as string]
+      return fsContents[path.toString()]
     })
     globCreateSpy.mockImplementation(async (pattern, options?) => {
       return new MockGlobber(fsContents, ".github/report-templates/")
     })
+    resolveSpy.mockImplementationOnce((p) => { return p })
     await expect(Render.Render("template.eta", "data.json", ".github/report-templates/")).resolves.toEqual([
       "### Report Hello",
       "  * Page 1",
@@ -68,5 +72,6 @@ describe("Run tests", () => {
     ].join("\n"))
     expect(readFileSpy).toBeCalledTimes(4)
     expect(globCreateSpy).toBeCalledTimes(1)
+    expect(resolveSpy).toBeCalledTimes(1)
   })
 })

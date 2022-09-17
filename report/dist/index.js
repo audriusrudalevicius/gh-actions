@@ -108,11 +108,14 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Render = void 0;
 const fs_1 = __nccwpck_require__(5747);
 const eta_1 = __nccwpck_require__(5154);
-const path = __importStar(__nccwpck_require__(5622));
+const path_1 = __importDefault(__nccwpck_require__(5622));
 const glob = __importStar(__nccwpck_require__(8090));
 const core = __importStar(__nccwpck_require__(2186));
 function Render(templatePath, dataPath, templatesDir) {
@@ -120,18 +123,15 @@ function Render(templatePath, dataPath, templatesDir) {
     return __awaiter(this, void 0, void 0, function* () {
         const tpl = yield fs_1.promises.readFile(templatePath);
         const data = yield fs_1.promises.readFile(dataPath);
-        if (core.isDebug()) {
-            core.debug(`templatesDir: ${templatesDir}`);
-        }
-        const globber = yield glob.create([templatesDir, '**.eta'].join(path.posix.sep));
+        const fullPath = path_1.default.resolve(templatesDir.toString());
+        core.debug(`templatesDir: ${fullPath}`);
+        const globber = yield glob.create([fullPath, '**.eta'].join(path_1.default.posix.sep));
         try {
             for (var _b = __asyncValues(globber.globGenerator()), _c; _c = yield _b.next(), !_c.done;) {
                 const file = _c.value;
-                const ext = path.extname(file);
-                const name = file.replace(templatesDir, '').replace(ext, '');
-                if (core.isDebug()) {
-                    core.debug(`including template: ${file.toString()} name: ${name}`);
-                }
+                const ext = path_1.default.extname(file);
+                const name = file.replace(fullPath, '').replace(ext, '');
+                core.debug(`including template: ${file.toString()} name: ${name}`);
                 const tplData = yield fs_1.promises.readFile(file);
                 eta_1.templates.define(name, (0, eta_1.compile)(tplData.toString()));
             }
