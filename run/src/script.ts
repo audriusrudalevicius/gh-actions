@@ -11,6 +11,7 @@ export class Script {
 
   async write(content: string): Promise<void> {
     await fs.writeFile(this._path, `#!/usr/bin/env bash
+    set -eo pipefail
     ${content}
     `)
   }
