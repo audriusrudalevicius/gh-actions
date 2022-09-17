@@ -41,15 +41,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const run_1 = __nccwpck_require__(884);
+const script_1 = __nccwpck_require__(798);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const script = core.getInput('script');
-            const result = yield (0, run_1.Run)(script);
-            core.setOutput("stdout", result.stdout);
-            core.setOutput("stderr", result.stderr);
-            core.setOutput("success", result.success);
-            core.setOutput("exit", result.exit);
+            const scriptContent = core.getInput('script');
+            const newScript = yield (0, script_1.Create)(scriptContent);
+            try {
+                const scriptResult = yield (0, run_1.Run)(newScript.path);
+                core.setOutput("stdout", scriptResult.stdout);
+                core.setOutput("stderr", scriptResult.stderr);
+                core.setOutput("success", scriptResult.success);
+                core.setOutput("exit", scriptResult.exit);
+            }
+            finally {
+                newScript.clean();
+            }
         }
         catch (error) {
             if (error instanceof Error)
@@ -97,7 +104,7 @@ function Run(command, args = [], silent = true) {
         };
         if (command === "")
             throw new Error("script is empty!");
-        const returnCode = yield (0, exec_1.exec)(`bash -c "${command}"`, args, options);
+        const returnCode = yield (0, exec_1.exec)(`bash "${command}"`, args, options);
         return {
             success: returnCode === 0,
             exit: returnCode,
@@ -107,6 +114,132 @@ function Run(command, args = [], silent = true) {
     });
 }
 exports.Run = Run;
+
+
+/***/ }),
+
+/***/ 798:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Create = exports.Script = void 0;
+const fs_1 = __nccwpck_require__(747);
+const util = __importStar(__nccwpck_require__(24));
+const path_1 = __importDefault(__nccwpck_require__(622));
+class Script {
+    constructor() {
+        this._path = [util.TmpDir(), `${Math.random().toString(36).slice(2)}.sh`].join(path_1.default.posix.sep);
+    }
+    get path() {
+        return this._path;
+    }
+    write(content) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield fs_1.promises.writeFile(this._path, `#!/usr/bin/env bash
+    ${content}
+    `);
+        });
+    }
+    clean() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fs_1.promises.unlink(this._path);
+        });
+    }
+}
+exports.Script = Script;
+function Create(content) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const newScript = new Script();
+        newScript.write(content);
+        return newScript;
+    });
+}
+exports.Create = Create;
+
+
+/***/ }),
+
+/***/ 24:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TmpDir = void 0;
+const fs_1 = __importDefault(__nccwpck_require__(747));
+const os = __importStar(__nccwpck_require__(87));
+const path_1 = __importDefault(__nccwpck_require__(622));
+let _tmpDir;
+function TmpDir() {
+    if (!_tmpDir) {
+        _tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os.tmpdir(), 'script-run-')).split(path_1.default.sep).join(path_1.default.posix.sep);
+    }
+    return _tmpDir;
+}
+exports.TmpDir = TmpDir;
 
 
 /***/ }),

@@ -1,5 +1,4 @@
 import { exec, ExecOptions } from "@actions/exec"
-
 export interface ExecResult {
   success: boolean
   exit: number
@@ -30,7 +29,8 @@ export async function Run(
   }
 
   if (command === "") throw new Error("script is empty!")
-  const returnCode: number = await exec(`bash -c "${command}"`, args, options)
+
+  const returnCode: number = await exec(`bash "${command}"`, args, options)
 
   return {
     success: returnCode === 0,

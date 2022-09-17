@@ -1,17 +1,23 @@
 import * as core from '@actions/core'
-import {Run} from './run'
+import { Run } from './run'
+import { Create } from './script'
 
 async function run(): Promise<void> {
+  try {
+    const scriptContent: string = core.getInput('script')
+    const newScript = await Create(scriptContent)
     try {
-      const script: string = core.getInput('script')
-      const result = await Run(script)
-      core.setOutput("stdout", result.stdout)
-      core.setOutput("stderr", result.stderr)
-      core.setOutput("success", result.success)
-      core.setOutput("exit", result.exit)
-    } catch (error) {
-      if (error instanceof Error) core.setFailed(error.message)
+      const scriptResult = await Run(newScript.path)
+      core.setOutput("stdout", scriptResult.stdout)
+      core.setOutput("stderr", scriptResult.stderr)
+      core.setOutput("success", scriptResult.success)
+      core.setOutput("exit", scriptResult.exit)
+    } finally {
+      newScript.clean()
     }
+  } catch (error) {
+    if (error instanceof Error) core.setFailed(error.message)
   }
-  
-  run()
+}
+
+run()
