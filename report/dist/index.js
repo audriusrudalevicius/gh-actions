@@ -123,7 +123,10 @@ function Render(templatePath, dataPath, templatesDir) {
     return __awaiter(this, void 0, void 0, function* () {
         const tpl = yield fs_1.promises.readFile(templatePath);
         const data = yield fs_1.promises.readFile(dataPath);
-        const fullPath = path_1.default.resolve(templatesDir.toString());
+        let fullPath = path_1.default.resolve(templatesDir.toString());
+        if (!fullPath.endsWith(path_1.default.posix.sep)) {
+            fullPath = fullPath + path_1.default.posix.sep;
+        }
         core.debug(`templatesDir: ${fullPath}`);
         const globber = yield glob.create([fullPath, '**.eta'].join(path_1.default.posix.sep));
         try {

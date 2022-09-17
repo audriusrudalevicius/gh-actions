@@ -8,7 +8,10 @@ import * as core from '@actions/core'
 export async function Render(templatePath: PathLike, dataPath: PathLike, templatesDir: PathLike): Promise<string> {
     const tpl = await fs.readFile(templatePath)
     const data = await fs.readFile(dataPath)
-    const fullPath = path.resolve(templatesDir.toString())
+    let fullPath = path.resolve(templatesDir.toString())
+    if (!fullPath.endsWith(path.posix.sep)) {
+        fullPath = fullPath + path.posix.sep
+    }
     core.debug(`templatesDir: ${fullPath}`)
 
     const globber = await glob.create([fullPath, '**.eta'].join(path.posix.sep))
