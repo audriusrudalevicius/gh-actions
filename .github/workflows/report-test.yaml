@@ -1,0 +1,21 @@
+name: integration test report
+on: workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+    - run: |
+        echo "{\"name\": \"Title\"}" > data.json
+        echo "<%~ include('header')%><% = it.name %>" > template.eta
+    - uses: ./report
+      id: report
+      with:
+        template: template.eta
+        data: data.json
+    - run: |
+        echo "${{ steps.report.outputs.result }}"
+
+    

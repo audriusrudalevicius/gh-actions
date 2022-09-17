@@ -1,0 +1,72 @@
+import { expect, test, jest, describe, beforeEach } from "@jest/globals"
+import * as Render from "../src/render"
+import { PathLike, promises as fs } from 'fs'
+import { FileHandle } from "fs/promises"
+import * as glob from '@actions/glob'
+import type { Globber } from '@actions/glob'
+
+type FsContnets = {
+  [key: string]: string;
+};
+
+class MockGlobber implements Globber {
+  private _items: FsContnets = {}
+  private _prefix = ''
+
+  constructor(items: FsContnets, prefix: string) {
+    this._items = items
+    this._prefix = prefix
+  }
+
+  getSearchPaths(): string[] {
+    throw new Error("Method not implemented.")
+  }
+  glob(): Promise<string[]> {
+    throw new Error("Method not implemented.")
+  }
+  async *globGenerator(): AsyncGenerator<string, void> {
+    for (const [key, value] of Object.entries(this._items)) {
+      if (key.indexOf(this._prefix) > -1) {
+        yield key;
+      }
+    }
+  }
+}
+
+describe("Run tests", () => {
+  beforeEach(() => {
+    jest.resetAllMocks()
+  })
+
+  const fsContents: FsContnets = {
+    'data.json': JSON.stringify({ 'pages': [{ 'title': 'Page 1' }, { 'title': 'Page 2' }] }),
+    'template.eta': [
+      "<%~ include('header', {name: 'Hello'})%>",
+      "<%- it.pages.forEach(function(page){ %>",
+      "  * <% = page.title %>",
+      "<%- }) %>",
+      "<%~ include('default/footer')%>"
+    ].join("\n"),
+    '.github/report-templates/header.eta': '### Report <%=it.name%>',
+    '.github/report-templates/default/footer.eta': '---',
+  }
+
+  test("renders template with data", async () => {
+    const readFileSpy = jest.spyOn(fs, "readFile")
+    const globCreateSpy = jest.spyOn(glob, "create")
+    readFileSpy.mockImplementation(async (path: FileHandle | PathLike): Promise<string> => {
+      return fsContents[path as string]
+    })
+    globCreateSpy.mockImplementation(async (pattern, options?) => {
+      return new MockGlobber(fsContents, ".github/report-templates/")
+    })
+    await expect(Render.Render("template.eta", "data.json", ".github/report-templates/")).resolves.toEqual([
+      "### Report Hello",
+      "  * Page 1",
+      "  * Page 2",
+      "---"
+    ].join("\n"))
+    expect(readFileSpy).toBeCalledTimes(4)
+    expect(globCreateSpy).toBeCalledTimes(1)
+  })
+})

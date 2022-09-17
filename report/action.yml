@@ -1,0 +1,19 @@
+name: 'Parses and formats tecton plan report'
+description: ''
+inputs:
+  templatesDir:
+    description: 'Path to report template'
+    required: true
+    default: ".github/report-templates/"  
+  template:
+    description: 'Path to report template'
+    required: true
+  data:
+    description: 'Path to report data json'
+    required: true
+outputs:
+  markdown:
+    description: ''
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

@@ -2,10 +2,20 @@ name: CI
 on: push
 
 jobs:
-  test:
+  test-run:
     defaults:
       run: 
         working-directory: run
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+    - run: npm install
+    - run: npm test
+  test-report:
+    defaults:
+      run: 
+        working-directory: report
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
