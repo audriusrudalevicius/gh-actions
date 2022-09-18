@@ -5,9 +5,10 @@ import { Create } from './script'
 async function run(): Promise<void> {
   try {
     const scriptContent: string = core.getInput('script')
+    const cwd: string = core.getInput('working-directory')
     const newScript = await Create(scriptContent)
     try {
-      const scriptResult = await Run(newScript.path)
+      const scriptResult = await Run(newScript.path, [], cwd)
       core.setOutput("stdout", scriptResult.stdout)
       core.setOutput("stderr", scriptResult.stderr)
       core.setOutput("success", scriptResult.success)

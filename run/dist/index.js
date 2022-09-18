@@ -46,9 +46,10 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const scriptContent = core.getInput('script');
+            const cwd = core.getInput('working-directory');
             const newScript = yield (0, script_1.Create)(scriptContent);
             try {
-                const scriptResult = yield (0, run_1.Run)(newScript.path);
+                const scriptResult = yield (0, run_1.Run)(newScript.path, [], cwd);
                 core.setOutput("stdout", scriptResult.stdout);
                 core.setOutput("stderr", scriptResult.stderr);
                 core.setOutput("success", scriptResult.success);
@@ -86,13 +87,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Run = void 0;
 const exec_1 = __nccwpck_require__(514);
-function Run(command, args = [], silent = true) {
+function Run(command, args = [], cwd, silent = true) {
     return __awaiter(this, void 0, void 0, function* () {
         let stdout = "";
         let stderr = "";
         const options = {
             silent,
             ignoreReturnCode: true,
+            cwd
         };
         options.listeners = {
             stdout: (data) => {
@@ -173,6 +175,7 @@ class Script {
     write(content) {
         return __awaiter(this, void 0, void 0, function* () {
             yield fs_1.promises.writeFile(this._path, `#!/usr/bin/env bash
+    set -eo pipefail
     ${content}
     `);
         });

@@ -9,6 +9,7 @@ export interface ExecResult {
 export async function Run(
   command: string,
   args: string[] = [],
+  cwd?: string,
   silent = true
 ): Promise<ExecResult> {
   let stdout = ""
@@ -17,6 +18,7 @@ export async function Run(
   const options: ExecOptions = {
     silent,
     ignoreReturnCode: true,
+    cwd
   }
 
   options.listeners = {
