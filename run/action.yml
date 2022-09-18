@@ -1,18 +1,21 @@
 name: 'Runs command and stores outputs'
 description: ''
 inputs:
+  working-directory:
+    description: 'working dir'
+    required: false
   script:
-    description: 'command'
+    description: 'bash script to execute'
     required: true
 outputs:
   stdout:
-    description: ''
+    description: 'stdout'
   stderr:
-    description: ''
+    description: 'stderr'
   exit:
-    description: ''
+    description: 'exit code'
   success:
-    description: ''
+    description: 'if script exited with zero'
 runs:
   using: 'node16'
   main: 'dist/index.js'
