@@ -1,6 +1,7 @@
 {
     "eslint.workingDirectories": [
         "run",
-        "report"
+        "report",
+        "tag_version"
     ]
 }

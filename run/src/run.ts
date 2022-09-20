@@ -10,7 +10,7 @@ export async function Run(
   command: string,
   args: string[] = [],
   cwd?: string,
-  silent = true
+  silent = false
 ): Promise<ExecResult> {
   let stdout = ""
   let stderr = ""
