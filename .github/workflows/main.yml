@@ -14,6 +14,9 @@ jobs:
         node-version: 16
     - run: npm install
     - run: npm outdated
+      continue-on-error: true
+    - run: npm audit
+      continue-on-error: true
     - run: npm test
     - run: npm build
   test-report:
@@ -28,6 +31,9 @@ jobs:
         node-version: 16
     - run: npm install
     - run: npm outdated
+      continue-on-error: true
+    - run: npm audit
+      continue-on-error: true
     - run: npm test
     - run: npm build
   test-tag_version:
@@ -42,5 +48,8 @@ jobs:
         node-version: 16
     - run: npm install
     - run: npm outdated
+      continue-on-error: true
+    - run: npm audit
+      continue-on-error: true
     - run: npm test
     - run: npm build
