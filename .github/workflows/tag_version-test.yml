@@ -1,0 +1,16 @@
+name: integration test run
+on: workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+    - uses: ./tag_version
+      id: test
+      with:
+        dry_run: 'true'
+    - run: |
+       echo "out: ${{ steps.test.outputs.next_version }}"
+    
